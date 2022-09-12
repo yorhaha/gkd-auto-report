@@ -1,108 +1,118 @@
-import pytz
 import requests
-from datetime import datetime
 import time
 import os
 
 s = requests.Session()
 
-user = os.environ["GKD_EMAIL"]    # sep账号
-passwd = os.environ["GKD_PASSWORD"]   # sep密码
+GKD_EMAIL = os.environ["GKD_EMAIL"]    # sep账号
+GKD_PASSWORD = os.environ["GKD_PASSWORD"]   # sep密码
+GKD_NUMBER = os.environ["GKD_NUMBER"]
+GKD_NAME = os.environ["GKD_NAME"]
+PUSH_TOKEN = os.environ["PUSH_TOKEN"]
 
-# Login function
-def login(s: requests.Session, username, password):
-    payload = {
-        "username": username,
-        "password": password
-    }
-    r = s.post("https://app.ucas.ac.cn/uc/wap/login/check", data=payload)
 
-    # print(r.text)
+def login(s: requests.Session):
+    r = s.post("https://app.ucas.ac.cn/uc/wap/login/check", data={
+        "username": GKD_EMAIL,
+        "password": GKD_PASSWORD
+    })
+
     if r.json().get('m') == "操作成功":
-        print("Congratulations！登录成功")
+        print("登录成功")
     else:
-        print(r.text)
-        print("登录失败")
+        send_message('登录失败', r.json())
         exit(1)
+
 
 def submit(s: requests.Session):
     new_daily = {
+        "number": GKD_NUMBER,
+        "realname": GKD_NAME,
 
-        ### personal information
-        # default information
-        "number": os.environ["GKD_NUMBER"],
-        "realname": os.environ["GKD_NAME"],
-
-        "date":time.strftime(r"%Y-%m-%d", time.localtime()),                # submitted date
-        "jzdz":"北京市怀柔区中国科学院大学雁栖湖校区西区一公寓",     # Residential Address
-        "zrzsdd":"1",                       # Yesterday place to stay    1.雁栖湖  8.京外
-        "sfzx":"1",                         # Whether you are in school or not  1.是, 主要是在雁栖湖校区   5.否
-        "szgj":"中国",                       # current country
-        "szdd":"国内",                       # current address
-        "dqszdd":"1",                       # current location
+        # submitted date
+        "date": time.strftime(r"%Y-%m-%d", time.localtime()),
+        "jzdz": "北京市怀柔区中国科学院大学雁栖湖校区西区一公寓",     # Residential Address
+        "zrzsdd": "1",                       # Yesterday place to stay    1.雁栖湖  8.京外
+        # Whether you are in school or not  1.是, 主要是在雁栖湖校区   5.否
+        "sfzx": "1",
+        "szgj": "中国",                       # current country
+        "szdd": "国内",                       # current address
+        "dqszdd": "1",                       # current location
 
         #
-        "address":"北京市怀柔区",
-        "area":"怀柔区",
-        "province":"北京市",
-        "city":"",
-        "geo_api_info":"{\"address\":\"北京市怀柔区\",\"details\":\"怀北镇中国科学院大学雁栖湖校区公寓中国科学院大学雁栖湖校区西区\",\"province\":{\"label\":\"北京市\",\"value\":\"\"},\"city\":{\"label\":\"\",\"value\":\"\"},\"area\":{\"label\":\"怀柔区\",\"value\":\"\"}}",
-        "szgj_api_info":"{\"area\":{\"label\":\"\",\"value\":\"\"},\"city\":{\"label\":\"\",\"value\":\"\"},\"address\":\"\",\"details\":\"\",\"province\":{\"label\":\"\",\"value\":\"\"}}",
-        "szgj_select_info":{},
+        "address": "北京市怀柔区",
+        "area": "怀柔区",
+        "province": "北京市",
+        "city": "",
+        "geo_api_info": "{\"address\":\"北京市怀柔区\",\"details\":\"怀北镇中国科学院大学雁栖湖校区公寓中国科学院大学雁栖湖校区西区\",\"province\":{\"label\":\"北京市\",\"value\":\"\"},\"city\":{\"label\":\"\",\"value\":\"\"},\"area\":{\"label\":\"怀柔区\",\"value\":\"\"}}",
+        "szgj_api_info": "{\"area\":{\"label\":\"\",\"value\":\"\"},\"city\":{\"label\":\"\",\"value\":\"\"},\"address\":\"\",\"details\":\"\",\"province\":{\"label\":\"\",\"value\":\"\"}}",
+        "szgj_select_info": {},
         #
 
-        "dqsfzzgfxdq":"4",                  # whether you are in high or medium risk area or not  4. 无上述情况
-        "zgfxljs":"4",                      # do you have a travel history in risk area  4. 无上述情况
-        "tw":"1",                           # Today’s body temperature 1.37.2℃及以下
-        "sffrzz":"0",                       # Do you have such symptoms as fever, fatigue, dry cough or difficulty in breathing today?
-        "dqqk1":"1",                        # current situation      1.正常
-        "dqqk1qt":"",
-        "dqqk2":"1",                        # current situation      1.无异常
-        "dqqk2qt":"",
-        "sfjshsjc":"1",                     # PCR test?       1.是 0.否
-        "dyzymjzqk":"3",                    # first vaccination situation  3.已接种
-        "dyzjzsj":"2021-03-07",             # date of first vaccination
-        "dyzwjzyy":"",
-        "dezymjzqk":"3",                    # second vaccination situation  3.已接种
-        "dezjzsj":"2021-03-28",             # date of second vaccination
-        "dezwjzyy":"",
-        "dszymjzqk":"6",                    # third vaccination situation  6.未接种
-        "dszjzsj":"2000-01-01",             # default time
-        "dszwjzyy":"在吃其他药物",                    # reason of non-vaccination
-        "gtshryjkzk":"1",                   # health situation
-        "extinfo":"",                       # other information
-        ### personal information
+        # whether you are in high or medium risk area or not  4. 无上述情况
+        "dqsfzzgfxdq": "4",
+        # do you have a travel history in risk area  4. 无上述情况
+        "zgfxljs": "4",
+        "tw": "1",                           # Today’s body temperature 1.37.2℃及以下
+        # Do you have such symptoms as fever, fatigue, dry cough or difficulty in breathing today?
+        "sffrzz": "0",
+        "dqqk1": "1",                        # current situation      1.正常
+        "dqqk1qt": "",
+        "dqqk2": "1",                        # current situation      1.无异常
+        "dqqk2qt": "",
+        # 昨天是否接受核酸检测
+        "sfjshsjc": "1",                     # PCR test?       1.是 0.否
+        # 第一针接种
+        "dyzymjzqk": "3",                    # first vaccination situation  3.已接种
+        "dyzjzsj": "2021-03-07",             # date of first vaccination
+        "dyzwjzyy": "",
+        # 第二针接种
+        "dezymjzqk": "3",                    # second vaccination situation  3.已接种
+        "dezjzsj": "2021-03-28",             # date of second vaccination
+        "dezwjzyy": "",
+        # 第三针接种
+        "dszymjzqk": "6",                    # third vaccination situation  6.未接种
+        "dszjzsj": "2000-01-01",             # default time
+        "dszwjzyy": "在吃其他药物",            # reason of non-vaccination
+
+        "gtshryjkzk": "1",                   # health situation
+        "extinfo": "",                       # other information
+        # personal information
 
         # "created_uid":"0",
         # "todaysfhsjc":"",
         # "is_daily":1,
-        "geo_api_infot":"{\"address\":\"北京市怀柔区\",\"details\":\"怀北镇中国科学院大学雁栖湖校区公寓中国科学院大学雁栖湖校区西区\",\"province\":{\"label\":\"北京市\",\"value\":\"\"},\"city\":{\"label\":\"\",\"value\":\"\"},\"area\":{\"label\":\"怀柔区\",\"value\":\"\"}}",
+        "geo_api_infot": "{\"address\":\"北京市怀柔区\",\"details\":\"怀北镇中国科学院大学雁栖湖校区公寓中国科学院大学雁栖湖校区西区\",\"province\":{\"label\":\"北京市\",\"value\":\"\"},\"city\":{\"label\":\"\",\"value\":\"\"},\"area\":{\"label\":\"怀柔区\",\"value\":\"\"}}",
 
         # yesterday information
-        "old_szdd":"国内",
-        "old_city":"{\"address\":\"北京市怀柔区\",\"details\":\"怀北镇中国科学院大学雁栖湖校区公寓中国科学院大学雁栖湖校区西区\",\"province\":{\"label\":\"北京市\",\"value\":\"\"},\"city\":{\"label\":\"\",\"value\":\"\"},\"area\":{\"label\":\"怀柔区\",\"value\":\"\"}}",
+        "old_szdd": "国内",
+        "old_city": "{\"address\":\"北京市怀柔区\",\"details\":\"怀北镇中国科学院大学雁栖湖校区公寓中国科学院大学雁栖湖校区西区\",\"province\":{\"label\":\"北京市\",\"value\":\"\"},\"city\":{\"label\":\"\",\"value\":\"\"},\"area\":{\"label\":\"怀柔区\",\"value\":\"\"}}",
     }
 
     r = s.post("https://app.ucas.ac.cn/ucasncov/api/default/save", data=new_daily)
     print("提交信息:", new_daily)
 
-    token = os.environ["PUSH_TOKEN"]
-    title= time.strftime("%Y-%m-%d", time.localtime())+'打卡结果通知' #改成你要的标题内容
-
-    # print(r.text)
     result = r.json()
     if result.get('m') == "操作成功":
-        print("打卡成功")
-        content = '打卡成功'
-        url = 'http://www.pushplus.plus/send?token='+token+'&title='+title+'&content='+content
-        requests.get(url)
+        send_message('打卡成功', '')
     else:
-        print("打卡失败，错误信息: ", r.json().get("m"))
-        content = '打卡失败，失败原因为:\n \t'+ r.json().get("m")
-        url = 'http://www.pushplus.plus/send?token='+token+'&title='+title+'&content='+content
-        requests.get(url)
+        send_message('打卡失败', r.json().get("m"))
+
+
+def send_message(title: str, content: str):
+    requests.get(
+        url='http://www.pushplus.plus/send',
+        params={
+            'token': PUSH_TOKEN,
+            'title': title,
+            'content': content
+        }
+    )
+
 
 if __name__ == "__main__":
-    print(datetime.now(tz=pytz.timezone("Asia/Shanghai")).strftime("%Y-%m-%d %H:%M:%S %Z"))
-    login(s, user, passwd)
-    submit(s)
+    try:
+        login(s)
+        submit(s)
+    except Exception as e:
+        send_message('执行错误', str(e))
