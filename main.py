@@ -6,8 +6,8 @@ import os
 
 s = requests.Session()
 
-user = os.environ["EMAIL"]    # sep账号
-passwd = os.environ["PASSWORD"]   # sep密码
+user = os.environ["GKD_EMAIL"]    # sep账号
+passwd = os.environ["GKD_PASSWORD"]   # sep密码
 
 # Login function
 def login(s: requests.Session, username, password):
@@ -30,8 +30,8 @@ def submit(s: requests.Session):
 
         ### personal information
         # default information
-        "number": os.environ["NUMBER"],
-        "realname": os.environ["NAME"],
+        "number": os.environ["GKD_NUMBER"],
+        "realname": os.environ["GKD_NAME"],
 
         "date":time.strftime(r"%Y-%m-%d", time.localtime()),                # submitted date
         "jzdz":"北京市怀柔区中国科学院大学雁栖湖校区西区一公寓",     # Residential Address
@@ -86,7 +86,7 @@ def submit(s: requests.Session):
     r = s.post("https://app.ucas.ac.cn/ucasncov/api/default/save", data=new_daily)
     print("提交信息:", new_daily)
 
-    token = os.environ["TOKEN"]
+    token = os.environ["PUSH_TOKEN"]
     title= time.strftime("%Y-%m-%d", time.localtime())+'打卡结果通知' #改成你要的标题内容
 
     # print(r.text)
