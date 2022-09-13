@@ -102,7 +102,7 @@ def submit(s: requests.Session):
 def send_message(title: str, content: str):
     print(title)
     print(content)
-    requests.get(
+    res = requests.get(
         url='http://www.pushplus.plus/send',
         params={
             'token': PUSH_TOKEN,
@@ -110,6 +110,8 @@ def send_message(title: str, content: str):
             'content': content
         }
     )
+    if res.status_code != 200:
+        print('推送失败: ' + res.text)
 
 
 if __name__ == "__main__":
