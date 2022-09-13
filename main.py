@@ -100,6 +100,8 @@ def submit(s: requests.Session):
 
 
 def send_message(title: str, content: str):
+    print(title)
+    print(content)
     requests.get(
         url='http://www.pushplus.plus/send',
         params={
