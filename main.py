@@ -94,7 +94,7 @@ def submit(s: requests.Session):
 
     result = r.json()
     if result.get('m') == "操作成功":
-        send_message('打卡成功', '')
+        send_message('打卡成功', '打卡成功！')
     else:
         send_message('打卡失败', r.json().get("m"))
 
