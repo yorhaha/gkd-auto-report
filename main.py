@@ -10,6 +10,12 @@ GKD_NUMBER = os.environ["GKD_NUMBER"]
 GKD_NAME = os.environ["GKD_NAME"]
 PUSH_TOKEN = os.environ["PUSH_TOKEN"]
 
+time_now = time.time()
+if time.timezone == 0:
+    time_now += 28800
+time_now = time.localtime(time_now)
+time_str = time.strftime('%Y-%m-%d %H:%M:%S', time_now)
+
 
 def login(s: requests.Session):
     r = s.post("https://app.ucas.ac.cn/uc/wap/login/check", data={
@@ -30,7 +36,7 @@ def submit(s: requests.Session):
         "realname": GKD_NAME,
 
         # submitted date
-        "date": time.strftime(r"%Y-%m-%d", time.localtime()),
+        "date": time.strftime(r"%Y-%m-%d", time_now),
         "jzdz": "北京市怀柔区中国科学院大学雁栖湖校区西区一公寓",     # Residential Address
         "zrzsdd": "1",                       # Yesterday place to stay    1.雁栖湖  8.京外
         # Whether you are in school or not  1.是, 主要是在雁栖湖校区   5.否
@@ -96,12 +102,14 @@ def submit(s: requests.Session):
     if result.get('m') == "操作成功":
         send_message('打卡成功', '打卡成功！')
     elif result.get('m') == '今天已经填报了':
-        print('今天已经填报了')
+        print(time_str + '今天已经填报了')
     else:
         send_message('打卡失败', r.json().get("m"))
 
 
 def send_message(title: str, content: str):
+    content = time_str + content
+    print(time_now)
     print(title)
     print(content)
     res = requests.get(
