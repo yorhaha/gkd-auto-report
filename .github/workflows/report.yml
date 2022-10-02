@@ -3,7 +3,7 @@ name: Report
 on:
   workflow_dispatch:
   schedule:
-    - cron: '1 17 * * *'
+    - cron: '1 17,23 * * *'
 
 permissions:
   contents: read
