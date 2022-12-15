@@ -1,4 +1,4 @@
-# gkd-auto-report
+# gkd-auto-report（此项目已被扫入历史的垃圾堆）
 
 UCAS 每日自动打卡。无需服务器。接口来自某不知名同学。
 
